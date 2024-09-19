@@ -21,6 +21,8 @@ func New(service OrderAggregationService) *Server {
 	return &Server{service: service}
 }
 
+// AggregateOrders reads a types.AggregationRequest from the request body and returns a json-encoded array of types.AggregationResult
+// NULL will be sent if no rows were found matching the filters in the AggregationRequest
 func (s *Server) AggregateOrders(w http.ResponseWriter, r *http.Request) {
 
 	var req types.AggregationRequest

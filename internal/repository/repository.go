@@ -24,6 +24,7 @@ func New(db PostgresDB) *PostgresRepository {
 	return &PostgresRepository{db: db}
 }
 
+// AggregateSalesPrice takes a filter with required orderDate range and returns aggregated data about sales prices in a tabular format
 func (r *PostgresRepository) AggregateSalesPrice(ctx context.Context, c types.AggregationRequest) ([]types.AggregationResult, error) {
 	if c.Filter.OrderDate == nil {
 		return nil, errors.Join(types.ErrInvalidArgument, errors.New("OrderDate is required"))
