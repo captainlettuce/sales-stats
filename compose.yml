@@ -1,0 +1,21 @@
+services:
+  backend:
+    build:
+      dockerfile: ./local-environment/Dockerfile
+    working_dir: /app
+    volumes:
+      - ./:/app
+    command:
+      - modd
+      - -f
+      - local-environment/modd.conf
+    ports:
+      - 8080:8080
+      - 40000:40000
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: superDevPassword
+      POSTGRES_DB: test-db
+    volumes:
+      - ./local-environment:/docker-entrypoint-initdb.d

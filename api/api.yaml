@@ -1,0 +1,209 @@
+openapi: 3.0.3
+info:
+  title: Sales data aggregation api
+  description: This api lets the user search historical order data in a tabular format
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8080'
+paths:
+  /aggregate:
+    post:
+      description: Search and aggregate price/day for a given date-range. The result can optionally filtered and grouped.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AggregationRequest"
+      responses:
+        200:
+          description: Aggregation ran successfully, returning full result set or null if the result set is empty
+          content:
+            application/json:
+              schema:
+                type: array
+                nullable: true
+                items:
+                  $ref: '#/components/schemas/AggregationResult'
+        400:
+          description: The request was malformed and/or invalid
+          content:
+            text/plain:
+              schema:
+                type: string
+
+components:
+  schemas:
+    AggregationRequest:
+      type: object
+      properties:
+        aggregationMethods:
+          $ref: '#/components/schemas/AggregationMethods'
+        filter:
+          $ref: '#/components/schemas/Filter'
+        groupBy:
+          $ref: '#/components/schemas/GroupBy'
+
+    AggregationMethods:
+      type: array
+      description: List of aggregation methods (e.g., avg, min, etc).
+      items:
+        type: string
+        enum: [avg, sum, min, max]
+
+    Filter:
+      type: object
+      properties:
+        orderDate:
+          allOf:
+            - $ref: '#/components/schemas/DateRange'
+            - type: object
+              nullable: false
+        orderStatus:
+          $ref: '#/components/schemas/OrderStatus'
+        make:
+          description: filter by car make
+          type: array
+          items:
+            type: string
+        model:
+          description: filter by car model
+          type: array
+          items:
+            type: string
+        version:
+          description: filter by car version
+          type: array
+          items:
+            type: string
+        color:
+          description: filter by car color
+          type: array
+          items:
+            type: string
+        price:
+          $ref: '#/components/schemas/IntegerRange'
+        modelYear:
+          $ref: '#/components/schemas/IntegerRange'
+        mileageKilometers:
+          $ref: '#/components/schemas/IntegerRange'
+
+    GroupBy:
+      type: object
+      properties:
+        make:
+          type: boolean
+          description: Group by car make
+        model:
+          type: boolean
+          description: Group by car model
+        version:
+          type: boolean
+          description: Group by car version
+        color:
+          type: boolean
+          description: Group by car color
+        modelYear:
+          type: boolean
+          description: Group by model year
+
+    DateRange:
+      type: object
+      properties:
+        before:
+          type: string
+          format: YYYY-MM-DD
+          example: "2024-12-14"
+        after:
+          type: string
+          format: YYYY-MM-DD
+          example: "2022-08-14"
+
+    OrderDate:
+      type: object
+      properties:
+        before:
+          type: string
+          format: date-time
+          description: Orders placed before this date.
+        after:
+          type: string
+          format: date-time
+          description: Orders placed after this date.
+
+    OrderStatus:
+      type: array
+      description: List of order statuses to filter by.
+      items:
+        type: string
+        enum: [RETURNED, COMPLETED, CANCELLED]
+        example: COMPLETED
+
+    IntegerRange:
+      type: object
+      properties:
+        over:
+          type: number
+          description: Filter for values over this value.
+        under:
+          type: number
+          description: Filter for values under this value.
+
+    AggregationResult:
+      type: object
+      description: A row of the aggregation result. make, model, version, color, and modelYear are only returned if they were supplied as a grouping criteria
+      properties:
+        avg:
+          type: integer
+          format: int64
+          description: The average value for the aggregation.
+          nullable: true
+          example: 403000
+        max:
+          type: integer
+          format: int64
+          description: The maximum value for the aggregation.
+          nullable: true
+          example: 603000
+        min:
+          type: integer
+          format: int64
+          description: The minimum value for the aggregation.
+          nullable: true
+          example: 203000
+        sum:
+          type: integer
+          format: int64
+          description: The sum of the values for the aggregation.
+          nullable: true
+          example: 760000
+        orderDate:
+          type: string
+          format: date
+          description: The date of the order.
+          nullable: false
+        make:
+          type: string
+          description: The make of the car.
+          nullable: true
+          example: Tesla
+        model:
+          type: string
+          description: The model of the car.
+          nullable: true
+          example: Model 3
+        version:
+          type: string
+          description: The version of the car.
+          nullable: true
+          example: Tesla Model 3 Performance, 510hp, 2019
+        color:
+          type: string
+          description: The color of the car.
+          nullable: true
+          example: Grey
+        modelYear:
+          type: integer
+          format: int64
+          description: The model year of the car.
+          nullable: true
+          example: 2019
